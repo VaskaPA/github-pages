@@ -1,0 +1,127 @@
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Table, TableHead, TableRow, TableHeader, TableBody, TableCell } from "@/components/ui/table";
+import { Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectItem } from "@/components/ui/select";
+
+const rolesPermissions = {
+  admin: ["users", "orders", "transport", "finance", "reports"],
+  logist: ["orders", "transport"],
+  accountant: ["finance"],
+  document: ["reports"]
+};
+
+export default function FreightCRM() {
+  const [userRole, setUserRole] = useState("admin");
+  const [users, setUsers] = useState([
+    { id: 1, name: "Иван", role: "logist" },
+    { id: 2, name: "Анна", role: "accountant" }
+  ]);
+  const [newUser, setNewUser] = useState({ name: "", role: "logist" });
+  const [orders, setOrders] = useState([
+    { id: 1, date: "2025-04-03", route: "Москва - СПб", cargo: "Металл", cost: "15000 руб." },
+    { id: 2, date: "2025-04-05", route: "Казань - Самара", cargo: "Продукты", cost: "9000 руб." }
+  ]);
+  const [newOrder, setNewOrder] = useState({ date: "", route: "", cargo: "", cost: "" });
+
+  const addUser = () => {
+    setUsers([...users, { id: users.length + 1, ...newUser }]);
+    setNewUser({ name: "", role: "logist" });
+  };
+
+  const addOrder = () => {
+    setOrders([...orders, { id: orders.length + 1, ...newOrder }]);
+    setNewOrder({ date: "", route: "", cargo: "", cost: "" });
+  };
+
+  return (
+    <div className="p-6">
+      <div className="mb-4">
+        <Select value={userRole} onChange={(e) => setUserRole(e.target.value)}>
+          <SelectItem value="admin">Администратор</SelectItem>
+          <SelectItem value="logist">Логист</SelectItem>
+          <SelectItem value="accountant">Бухгалтер</SelectItem>
+          <SelectItem value="document">Документооборот</SelectItem>
+        </Select>
+      </div>
+      <Tabs defaultValue="orders">
+        <TabsList className="mb-4">
+          {rolesPermissions[userRole].includes("users") && <TabsTrigger value="users">Пользователи</TabsTrigger>}
+          {rolesPermissions[userRole].includes("orders") && <TabsTrigger value="orders">Заказы</TabsTrigger>}
+          {rolesPermissions[userRole].includes("transport") && <TabsTrigger value="transport">Транспорт</TabsTrigger>}
+          {rolesPermissions[userRole].includes("finance") && <TabsTrigger value="finance">Финансы</TabsTrigger>}
+          {rolesPermissions[userRole].includes("reports") && <TabsTrigger value="reports">Отчеты</TabsTrigger>}
+        </TabsList>
+        
+        {rolesPermissions[userRole].includes("users") && (
+          <TabsContent value="users">
+            <Card>
+              <CardContent>
+                <h2 className="text-xl font-bold">Управление пользователями</h2>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  <Input placeholder="Имя" value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} />
+                  <Select value={newUser.role} onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}>
+                    <SelectItem value="logist">Логист</SelectItem>
+                    <SelectItem value="accountant">Бухгалтер</SelectItem>
+                    <SelectItem value="document">Документооборот</SelectItem>
+                  </Select>
+                </div>
+                <Button onClick={addUser}><Plus className="w-4 h-4 mr-2" /> Добавить</Button>
+                <Table className="mt-4">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Имя</TableHead>
+                      <TableHead>Роль</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map(user => (
+                      <TableRow key={user.id}>
+                        <TableCell>{user.name}</TableCell>
+                        <TableCell>{user.role}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+        
+        {rolesPermissions[userRole].includes("orders") && (
+          <TabsContent value="orders">
+            <Card>
+              <CardContent>
+                <h2 className="text-xl font-bold">Заказы</h2>
+                <Button onClick={addOrder}><Plus className="w-4 h-4 mr-2" /> Добавить</Button>
+                <Table className="mt-4">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Дата</TableHead>
+                      <TableHead>Маршрут</TableHead>
+                      <TableHead>Груз</TableHead>
+                      <TableHead>Стоимость</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orders.map(order => (
+                      <TableRow key={order.id}>
+                        <TableCell>{order.date}</TableCell>
+                        <TableCell>{order.route}</TableCell>
+                        <TableCell>{order.cargo}</TableCell>
+                        <TableCell>{order.cost}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+      </Tabs>
+    </div>
+  );
+}
